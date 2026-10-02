@@ -1,7 +1,10 @@
 import axios from 'axios'
 
+const apiHost = import.meta.env.VITE_API_URL || 'http://localhost:8080'
+const apiBaseUrl = apiHost.startsWith('http') ? apiHost : `https://${apiHost}`
+
 const api = axios.create({
-  baseURL: 'http://localhost:8080/api',
+  baseURL: `${apiBaseUrl.replace(/\/+$/, '')}/api`,
 })
 
 api.interceptors.request.use((config) => {

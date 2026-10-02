@@ -38,18 +38,12 @@ blog-app/
 
 ## 1. Set up MySQL
 
-Make sure a MySQL server is running locally on port 3306. The backend is
-configured with `createDatabaseIfNotExist=true` and
+Make sure a MySQL server is running locally on port 3306. The backend defaults
+to the `root` username and an empty password; set the `SPRING_DATASOURCE_*`
+environment variables in your shell if your local MySQL credentials differ.
+The backend uses `createDatabaseIfNotExist=true` and
 `spring.jpa.hibernate.ddl-auto=update`, so it creates the `blog_db` database
-and all tables automatically the first time it starts.
-
-Open `backend/src/main/resources/application.properties` and update these
-lines to match your actual MySQL root password:
-
-```properties
-spring.datasource.username=root
-spring.datasource.password=root
-```
+and tables automatically the first time it starts.
 
 If you're on MySQL 8's default `caching_sha2_password` authentication and see
 a "Public Key Retrieval is not allowed" error, the JDBC URL already includes
@@ -109,6 +103,30 @@ backend at `http://localhost:8080/api`.
 
 Since the homepage requires login (like X), you'll land on the login screen
 first. Log in as `admin` / `admin123`, or register a new account.
+
+## Deploy to Render
+
+The root `render.yaml` defines a static frontend and a Docker-based Spring API.
+Render does not provide a managed MySQL service, so create a MySQL database
+with an external provider first and have its connection details ready. In
+Render, create a Blueprint from this repository and provide the API service's
+`SPRING_DATASOURCE_URL` (full JDBC URL), `SPRING_DATASOURCE_USERNAME`,
+`SPRING_DATASOURCE_PASSWORD`, a strong `APP_ADMIN_PASSWORD`, and the frontend's
+exact `https://...onrender.com` origin as `APP_CORS_ALLOWED_ORIGINS` when
+prompted. The Blueprint generates `JWT_SECRET` and connects the frontend/API
+URLs.
+
+Use a JDBC URL in this form, with the provider's host, port, and database:
+
+```text
+jdbc:mysql://HOST:PORT/DATABASE?useSSL=true&serverTimezone=UTC
+```
+
+The frontend URL is served by Render and the API listens on Render's assigned
+port. After deployment, test registration/login and verify that the API can
+reach the database. If the database password previously stored in
+`application.properties` was real, rotate it before deploying; secrets should
+only be stored in Render environment variables.
 
 ## Troubleshooting
 

@@ -55,7 +55,13 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of(allowedOrigins.split(",")));
+        List<String> origins = List.of(allowedOrigins.split(",")).stream()
+            .map(String::trim)
+            .map(origin -> origin.startsWith("http://") || origin.startsWith("https://")
+                ? origin
+                : "https://" + origin)
+            .toList();
+        config.setAllowedOrigins(origins);
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
